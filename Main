@@ -1,11 +1,13 @@
 import json
+import time
 import requests
 from g4f.client import Client
 import os.path
 from g4f.cookies import set_cookies_dir, read_cookie_files
-from g4f.Provider import RetryProvider,AI365VIP,AiChats,Allyfy,Liaobots,Nexra
+from g4f.Provider import RetryProvider,Allyfy,Liaobots,DDG,ChatGptEs,Pizzagpt
 import g4f.debug
 g4f.debug.logging = True
+import csv
 
 
 # WooCommerce API credentials
@@ -13,34 +15,15 @@ wc_api_url = 'https://v2ray24.store/wp-json/wc/v3/products'
 consumer_key = 'ck_326169970f1de0972a0c277f86e7403a37f81bdf'
 consumer_secret = 'cs_4728a3abfb658dd6fa934beeb0ed10c6ff81b86a'
 
-# OpenAI API key
-openai_api_key = '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'
-
 # WooCommerce authentication parameters
 wc_auth_params = {
     'consumer_key': consumer_key,
     'consumer_secret': consumer_secret
 }
-cookies_dir = os.path.join(os.path.dirname(__file__), "har_and_cookies")
-set_cookies_dir(cookies_dir)
-read_cookie_files(cookies_dir)
-
-
-# Function to extract cookies from .har file
-def load_cookies_from_har(har_file):
-    with open(har_file, "r", encoding="utf-8") as f:
-        har_data = json.load(f)
-        
-    cookies = {}
-    for entry in har_data['log']['entries']:
-        for cookie in entry['request']['cookies']:
-            cookies[cookie['name']] = cookie['value']
-    return cookies
-
-# Load cookies from the .har file
-
 
 client = Client(
+    provider=RetryProvider([Liaobots,DDG,ChatGptEs,Pizzagpt]),
+    #proxies="http://127.0.0.1:10809",
 )
 
 
@@ -49,8 +32,9 @@ def generate_text_with_g4f(prompt, max_tokens=1500):
 
    
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
+        
     )
     
     return response.choices[0].message.content
@@ -81,24 +65,14 @@ def generate_article_for_product(product, update=False):
     if existing_description and update:
         # Append new content, asking explicitly for a continuation of the existing description
         prompt = (
-    f"Expand and update the existing product description for '{product_name}' in Persian by adding more detailed "
-    f"information about its features, benefits, and technical specifications while maintaining focus on the product's unique selling points. Focus on key features and present them "
-    f"using a structured list in HTML (<ul><li>) format . The text should flow naturally from the existing description "
-    f"underneath using <li> tags. Do not include any unnecessary or unrelated text. and fully optimized "
-    f"for SEO and Marketing."
+    f"توضیحات محصول '{product_name}' را به زبان فارسی گسترش و به‌روزرسانی کنید و اطلاعات دقیق‌تری درباره ویژگی‌ها، مزایا و مشخصات فنی آن اضافه کنید. تمرکز بر نقاط قوت منحصر به فرد محصول داشته باشید. ویژگی‌های کلیدی را به صورت فهرست‌وار با استفاده از فرمت HTML (<ul><li>) ارائه دهید. متن باید به طور طبیعی از توضیحات موجود زیر استفاده کند و از تگ‌های <li> استفاده کند. از درج هر گونه متن غیرضروری یا نامرتبط خودداری کنید و به طور کامل بهینه‌سازی شده برای SEO و بازاریابی باشد."
 )
 
 
 
     else:
         # Generate a completely new description along with an SEO-optimized title
-        prompt = (
-    f"Write a 300-word SEO-optimized product description in Persian for '{product_name}', focusing on its general "
-    f"uses, applications, and target audience. The description should introduce the product in a natural and "
-    f"readable way for potential customers. Use proper HTML structure with headings (H2 and H3) and include "
-    f"a short paragraph at the end with a call to action to buy the product. Make sure the HTML code is clean and "
-    f"optimized for SEO.Do not include any unnecessary or unrelated text."
-)
+       prompt = (f"یک توضیحات ۳۰۰ کلمه‌ای بهینه‌سازی شده برای SEO به زبان فارسی برای '{product_name}' بنویسید که بر روی کاربردها، مصارف و هدف مخاطبان آن تمرکز کند. توضیحات باید محصول را به طور طبیعی و قابل خواندن برای مشتریان بالقوه معرفی کند. از ساختار HTML مناسب با عناوین (H2 و H3) استفاده کنید و یک پاراگراف کوتاه در انتها با یک دعوت به عمل برای خرید محصول قرار دهید. مطمئن شوید که کد HTML تمیز و بهینه‌سازی شده برای SEO است. از درج هر گونه متن غیرضروری یا نامرتبط خودداری کنید.")
 
 
 
@@ -200,7 +174,9 @@ def generate_and_post_comments_for_product(product_id, product_name):
 # Main function to handle product updates and review generation
 def main():
     # Step 1: Retrieve all products
-    products = get_all_products()
+    #products = get_all_products()
+
+    #discription to woocommerce
     '''
     for product in products :
         product_name = product['name']
@@ -208,7 +184,8 @@ def main():
         print(product_id,product_name)
         generate_and_post_comments_for_product(product_id, product_name)
     '''
-    # Step 2: Process each product
+    #discription to woocommerce
+    ''' # Step 2: Process each product
     for product in products:
         product_name = product['name']
         existing_description = product.get('description', '').strip()
@@ -220,7 +197,48 @@ def main():
         else:
             # Step 3: Add a new description if none exists
             print(f"Adding new description for product '{product_name}'...")
-            generate_article_for_product(product, update=False)
+            generate_article_for_product(product, update=False)'''
+    
+
+
+    input_file_path = 'products.csv'
+    output_file_path = 'updated_file.csv'
+
+    # Read the existing CSV data
+    with open(input_file_path, mode='r', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        
+        # Create a list to hold the updated rows
+        updated_rows = []
+        
+        # Iterate over each row in the CSV
+        for row in reader:
+            # Add the new description column
+            
+            print('\n\n\n\n\n -----------------------------------------------------------------')
+            print(f'product id {row['ID']} is processing\n\n\n\n')
+            prompt = (f"برای محصول {row['post_title']} یک عنوان کوتاه و پربازده برای SEO در داخل پرانتز بنویس. سپس یک توضیحات بین 300 تا 500 کلمه با رعایت اصول SEO از نظر پلاگین Yoast بنویس. توضیحات باید شامل تگ‌های HTML مناسب مثل <h1>، <h2>، <strong> و <p> باشد. هیچ کاراکتر اضافی یا توضیحات خارج از این موارد در خروجی ننویس.")
+            article_content = generate_text_with_g4f(prompt, max_tokens=1500)
+           
+            print('\n\n\n\n\n -----------------------------------------------------------------')
+            print(article_content)
+            print('\n\n\n\n\n -----------------------------------------------------------------')
+            time.sleep(2)
+            row['description'] = article_content
+            updated_rows.append(row)
+
+    # Write the updated data to a new CSV file
+    with open(output_file_path, mode='w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = reader.fieldnames + ['description']  # Add new column to fieldnames
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        
+        # Write the header
+        writer.writeheader()
+        
+        # Write the updated rows
+        writer.writerows(updated_rows)
+
+    print(f'Updated CSV file saved as {output_file_path}')
 
 if __name__ == "__main__":
     main()
