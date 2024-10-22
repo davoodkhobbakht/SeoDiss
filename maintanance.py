@@ -1,3 +1,4 @@
+import json
 import requests
 from google.oauth2 import service_account
 import googleapiclient.discovery
@@ -42,29 +43,7 @@ def get_gsc_data(service, site_url, product_url, days_ago=30):
     search_queries = [row['keys'][0] for row in response.get('rows', [])]
     return search_queries
 
-
-# Competitor data collection through Google search
-def fetch_competitor_data_from_search(query, num_results=5):
-    competitor_data = []
-    search_results = search(query, num_results=num_results)
-    for result in search_results:
-        try:
-            response = requests.get(result)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                text_content = soup.get_text(separator=' ', strip=True)
-                competitor_data.append({'url': result, 'content': text_content[:1000]})  # First 1000 chars
-        except Exception as e:
-            print(f"Error fetching data from {result}: {e}")
-    return competitor_data
-
-def fetch_competitor_data_for_queries(top_queries):
-    competitor_data = {}
-    for query in top_queries:
-        competitor_data[query] = fetch_competitor_data_from_search(query)
-    return competitor_data
-
-
+    
 
 # Analyze and improve content with headings and SEO considerations
 def analyze_and_improve_content(product_name, current_description, search_queries, competitor_data):
@@ -99,7 +78,7 @@ def analyze_and_improve_content(product_name, current_description, search_querie
 def update_product_content(product_name, current_description, product_url, site_url):
     gsc_service = initialize_gsc_service()
     search_queries = get_gsc_data(gsc_service, site_url, product_url)
-    competitor_data = fetch_competitor_data_for_queries(search_queries) if search_queries != [] else None
+    #competitor_data = fetch_competitor_data_for_queries(search_queries) if search_queries != [] else None
     improved_content_response = analyze_and_improve_content(product_name, current_description, search_queries, competitor_data)
     print(improved_content_response)
     # Parse and replace low-quality sentences
@@ -187,7 +166,7 @@ def main():
         product_name = product['name']
         product_url = product['permalink']
         current_description = product['description']
-
+        print(product)
         print(f"Processing '{product_name}'...")
 
         # Update content based on GSC data
@@ -195,7 +174,7 @@ def main():
         
         # Analyze and update internal links based on related products
         search_queries = get_gsc_data(initialize_gsc_service(), site_url, product_url)
-        updated_description_with_links = analyze_and_update_links(updated_content, product_name, related_products(product, products), search_queries)
+        updated_description_with_links = analyze_and_update_links(updated_content, product_name, related_products(product, products), search_queries if search_queries!= [] else product["meta_data"])
 
         # Insert optimized internal links into the description
         final_description = update_internal_links(current_description, updated_description_with_links, related_products(product))
