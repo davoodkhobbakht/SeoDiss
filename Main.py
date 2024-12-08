@@ -43,7 +43,7 @@ wc_auth_params = {
 }
 
 client = Client(
-    provider=RetryProvider([Liaobots,DDG,ChatGptEs,Pizzagpt,]),
+    provider=RetryProvider([Liaobots,DDG,ChatGptEs,]),
     #proxies="http://127.0.0.1:10809",
 )
 
