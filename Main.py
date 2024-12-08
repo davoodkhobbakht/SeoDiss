@@ -5,17 +5,37 @@ import requests
 from g4f.client import Client
 import os.path
 from g4f.cookies import set_cookies_dir, read_cookie_files
-from g4f.Provider import RetryProvider,Allyfy,Liaobots,DDG,ChatGptEs,Pizzagpt
+from g4f.Provider import RetryProvider,Liaobots,DDG,ChatGptEs,Pizzagpt,OpenaiChat
 import g4f.debug
 g4f.debug.logging = True
 import csv
 
 
 # WooCommerce API credentials
-wc_api_url = 'https://kafshdoozakmug.com/wp-json/wc/v3/products'
-consumer_key = 'ck_****************************************'
-consumer_secret = 'cs_****************************************'
 
+
+# Load configuration from a JSON file
+def load_config(config_file="config.json"):
+    try:
+        with open(config_file, "r") as file:
+            config = json.load(file)
+        return config
+    except FileNotFoundError:
+        print(f"Configuration file '{config_file}' not found.")
+        exit(1)
+    except json.JSONDecodeError:
+        print(f"Configuration file '{config_file}' is not a valid JSON file.")
+        exit(1)
+
+
+
+config = load_config()
+wc_api_url =config['wc_api_url']
+consumer_key=config['consumer_key']
+consumer_secret=config['consumer_secret']
+wp_api_url =config['wp_api_url']
+wp_username = config['wp_username']
+wp_password = config['wp_password']
 # WooCommerce authentication parameters
 wc_auth_params = {
     'consumer_key': consumer_key,
@@ -23,18 +43,21 @@ wc_auth_params = {
 }
 
 client = Client(
-    provider=RetryProvider([Liaobots,DDG,ChatGptEs,Pizzagpt]),
+    provider=RetryProvider([Liaobots,DDG,ChatGptEs,Pizzagpt,]),
     #proxies="http://127.0.0.1:10809",
 )
 
 
 # Function to generate text using GPT-4Free (g4f)
-def generate_text_with_g4f(prompt, max_tokens=1500):
+def generate_text_with_g4f(prompt, max_tokens=4000):
 
    
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
+        max_tokens=max_tokens,
+        temperature = 0.1
+        
         
     )
     
@@ -175,10 +198,10 @@ def generate_and_post_comments_for_product(product_id, product_name):
 def generate_keywords_for_product(product_name):
     
     prompt = (
-    f"Generate exactly 3 highly relevant Persian SEO keywords for the product '{product_name}' that have high search volume. "
+    f"Generate exactly 3 highly relevant Persian SEO keywords for '{product_name}' that have high search volume. "
     f"The list should include both short and long-tail keywords, ordered by importance, with the most important keyword first. "
     f"Return the output as a clean, plain list with no extra characters, symbols, explanations, or blank lines. "
-    f"Ensure the output is formatted as a valid JSON list in the form: ['keyword1', 'keyword2', 'keyword3']."
+    f"Ensure the output is formatted as a valid JSON list in the form: ['keyword1', 'keyword2', 'keyword3'].Write in Persian."
 )
     response = client.chat.completions.create(
         model="gpt-4",
