@@ -6,7 +6,7 @@ import datetime
 from g4f.client import Client
 
 from g4f.Provider import RetryProvider,Allyfy,Liaobots,DDG,ChatGptEs,Pizzagpt
-from Main import generate_text_with_g4f,related_products,get_all_products
+from SeoThisApi.SeoThisApi.main.utils import generate_text_with_g4f,related_products,get_all_products
 
 # Google Search Console configurations
 SERVICE_ACCOUNT_FILE = 'kafshdoozakmug-83f06edd9e2d.json'
@@ -151,14 +151,15 @@ def main():
         product_name = product['name']
         product_url = product['permalink']
         current_description = product['description']
-        print('\n\n\ncurrent_description:\n' + current_description +'\n\n\n')
+        #print('\n\n\ncurrent_description:\n' + current_description +'\n\n\n')
         print(f"Processing '{product_name}'...")
 
         # Update content based on GSC data
-        updated_content = update_product_content(product_name, current_description, product_url, site_url,related_products(product, products))
+        #updated_content = update_product_content(product_name, current_description, product_url, site_url,related_products(product, products))
         
         # Analyze and update internal links based on related products
         search_queries = get_gsc_data(initialize_gsc_service(), site_url, product_url)
+        print(search_queries)
         #updated_description_with_links = analyze_and_update_links(updated_content, product_name, related_products(product, products), search_queries if search_queries!= [] else product["meta_data"])
 
         # Insert optimized internal links into the description

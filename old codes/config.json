@@ -1,0 +1,9 @@
+{
+    "wc_api_url" :"https://ardalangallery.ir/wp-json/wc/v3",
+    "consumer_key":"ck_02b842073f75ebb37b3cd93d9dda00f07f6abf6f",
+    "consumer_secret":"cs_79a9b7a118d2a2e31b3aef40dffce52e986200ee",
+    "wp_api_url" : "https://ardalangallery.ir/wp-json/wp/v2",
+    "wp_username" : "thedot",
+    "wp_password" : "I@#m2BAi1bmrcv4d"
+
+}

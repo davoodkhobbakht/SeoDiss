@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from g4f.client import Client
 from g4f.Provider import RetryProvider, Liaobots, DDG, ChatGptEs, Pizzagpt
-from Main import generate_text_with_g4f, generate_keywords_for_product
+from SeoThisApi.SeoThisApi.main.utils import generate_text_with_g4f, generate_keywords_for_product
 import feedparser
 from g4f.client import Client
 

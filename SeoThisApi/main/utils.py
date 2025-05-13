@@ -5,7 +5,7 @@ import requests
 from g4f.client import Client
 import os.path
 from g4f.cookies import set_cookies_dir, read_cookie_files
-from g4f.Provider import RetryProvider,Liaobots,DDG,ChatGptEs,Pizzagpt,OpenaiChat
+from g4f.Provider import RetryProvider,PollinationsAI,Yqcloud
 import g4f.debug
 g4f.debug.logging = True
 import csv
@@ -43,7 +43,7 @@ wc_auth_params = {
 }
 
 client = Client(
-    provider=RetryProvider([Liaobots,DDG,ChatGptEs,]),
+    provider=RetryProvider([PollinationsAI,Yqcloud]),
     #proxies="http://127.0.0.1:10809",
 )
 
@@ -161,8 +161,8 @@ def post_comment_and_reply(product_id, question, reply):
         "content": question,
         "status": "publish"  # Automatically approve the comment
     }
-
-    question_response = requests.post(wc_api_url, json=question_data, params=wc_auth_params)
+    comments_api_url = f"{wp_api_url}/wp-json/wp/v2/comments"
+    question_response = requests.post(comments_api_url, json=question_data, params=wc_auth_params)
 
     if question_response.status_code == 201:
         question_id = question_response.json().get('id')
@@ -233,7 +233,7 @@ def generate_dynamic_tone_for_article(product_name,):
     # AI prompt for generating the tone
     prompt = (
         f"Generate a clean and concise tone for writing an engaging product description for the product '{product_name}'. "
-        f"The tone should evoke emotions and create a personal connection with the reader.based on the personality type '{selected_personality}'. "
+        f"The tone should evoke emotions and create a personal connection with the reader.suitable for personality type '{selected_personality}'. "
         f"For this product, imagine the target audience and write the tone part that reflects their emotions and desires. "
         f"Use informal language, include human-like anecdotes,idioms, rhetorical phrases and questions, and emotional language. "
         f"Ensure the tone is persuasive.the answer should be an optimized prompt to gpt4 to specify tone of an article. Avoid extra characters or explanations in the output."
@@ -390,7 +390,7 @@ def generate_seo_metadata(product_name, product_description, keywords):
 # Main function to handle product updates and review generation
 def main():
     # Step 1: Retrieve all products
-    #products = get_all_products()
+    products = get_all_products()
 
     #discription to woocommerce
     '''
@@ -456,8 +456,7 @@ def main():
 
     print(f'Updated CSV file saved as {output_file_path}')'''
     
-    #products = get_all_products()
-    products = [{'name':'سرویس خواب بلوط پارچه دار' ,'id' :1},{'name':'سرویس خواب بلوط تمام چوب' ,'id' :2},{'name':'سرویس خواب نیو توسکا' ,'id' :3}]
+    products = get_all_products()
     for product in products:
         product_name = product['name']
         product_id = product['id']
@@ -477,7 +476,7 @@ def main():
         # Step 4: create seo metadate
         seo_metadata = generate_seo_metadata(product_name,article_content,keywords)
         # Step 5 : Post the generated article back to WooCommerce
-        #post_article_to_product(product_id, article_content,seo_metadata['seo_title'],seo_metadata['meta_description'],focus_keyword= keywords[0])
+        post_article_to_product(product_id, article_content,seo_metadata['seo_title'],seo_metadata['meta_description'],focus_keyword= keywords[0])
 if __name__ == "__main__":
     main()
 
