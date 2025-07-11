@@ -158,6 +158,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 For questions or feedback, please reach out via **davoodkhobbakht@gmail.com** or create an issue in the [GitHub repository](https://github.com/davoodkhobbakht/SeoDiss).
 
----
-
-Adjust the placeholders like **your-email@example.com** and the GitHub link with actual details for your repository.
