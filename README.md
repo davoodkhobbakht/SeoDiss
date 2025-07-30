@@ -1,6 +1,3 @@
-Based on the extracted contents of the `SeoDiss` project, here is a structured README template that describes each file and its use case:
-
----
 
 # SeoDiss
 
